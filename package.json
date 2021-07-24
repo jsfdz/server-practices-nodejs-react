@@ -4,6 +4,7 @@
   "description": "Practicas con react, nodejs y express",
   "main": "index.js",
   "scripts": {
+    "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
   "keywords": [
