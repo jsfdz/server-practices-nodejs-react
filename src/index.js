@@ -3,6 +3,8 @@ const helmet = require('helmet')
 const cors = require('cors')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
+const User = require('./models/user.model')
 
 require('dotenv').config()
 const port = process.env.PORT || 3000
@@ -24,6 +26,28 @@ app.get('/', (req, res) => {
   res.status(200).json({
     statusCode: 200,
     message: 'backend practices v1.0'
+  })
+})
+
+app.post('/users', async (req, res) => {
+  const {name, email, password} = req.body
+  const hashPassword = await bcrypt.hash(password, 10)
+  User({
+    name,
+    email,
+    password: hashPassword
+  }).save()
+  res.status(200).json({
+    statusCode: 200,
+    message: `${name} created!`
+  })
+})
+
+app.get('/users', async (req, res) => {
+  const users = User.find()
+  res.status(200).json({
+    statusCode: 200,
+    data: {users}
   })
 })
 
