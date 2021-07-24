@@ -44,10 +44,23 @@ app.post('/users', async (req, res) => {
 })
 
 app.get('/users', async (req, res) => {
-  const users = User.find()
+  const users = await User.find()
   res.status(200).json({
     statusCode: 200,
     data: {users}
+  })
+})
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+})
+
+app.use((req, res, next) => {
+  res.status(404).json({
+    statusCode: 404,
+    path: req.path,
+    message: 'Ooops! Error 404'
   })
 })
 
