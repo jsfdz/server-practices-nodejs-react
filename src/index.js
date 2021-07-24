@@ -8,10 +8,15 @@ const User = require('./models/user.model')
 
 require('dotenv').config()
 const port = process.env.PORT || 3000
-mongoose.connect(process.env.URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+try {
+  mongoose.connect(process.env.URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  console.log('Connected!')
+} catch(err) {
+  console.log(err)
+}
 const app = express()
 
 app.set('json spaces', 2)
