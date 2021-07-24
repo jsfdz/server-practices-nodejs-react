@@ -113,10 +113,10 @@ app.get('/tasks', async (req, res) => {
 app.post('/tasks', auth, async (req, res) => {
   const { id } = req
   console.log(id)
-  const { name, task, date } = req.body
+  const { title, task, date } = req.body
   const user = await User.findById(id)
   console.log(user)
-  await new Task({ name, task, date, authorName: user._id }).save()
+  await new Task({ title, task, date, userId: user._id }).save()
   res.status(200).json({
     statusCode: 200,
     message: 'task created!'
@@ -134,8 +134,8 @@ app.delete('/tasks/:id', auth, async (req, res) => {
 
 app.put('/tasks/:id', auth, async (req, res) => {
   const { id } = req.params
-  const { name, task, date, isCompleted } = req.body
-  await Task.findByIdAndUpdate(id, { name, task, date, isCompleted })
+  const { title, task, date, isCompleted } = req.body
+  await Task.findByIdAndUpdate(id, { title, task, date, isCompleted })
   res.status(200).json({
     statusCode: 200,
     message: 'task updated!'
