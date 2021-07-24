@@ -6,7 +6,13 @@ const schema = new Schema({
   password: { type: String }
 },
 {
-  timestamp: true
+  timestamps: true
 })
+
+schema.methods.toJSON = function () {
+  const { _id, _v, ...rest } = this.toObject()
+  rest.id = _id
+  return rest
+}
 
 module.exports = model('User', schema)
