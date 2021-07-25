@@ -112,10 +112,8 @@ app.get('/tasks', async (req, res) => {
 
 app.post('/tasks', auth, async (req, res) => {
   const { id } = req
-  console.log(id)
   const { title, task, date } = req.body
   const user = await User.findById(id)
-  console.log(user)
   await new Task({ title, task, date, userId: user._id }).save()
   res.status(200).json({
     statusCode: 200,
@@ -143,8 +141,8 @@ app.put('/tasks/:id', auth, async (req, res) => {
 })
 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
 })
 
 app.use((req, res, next) => {

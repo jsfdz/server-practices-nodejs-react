@@ -10,7 +10,7 @@ const schema = new Schema({
 })
 
 schema.methods.toJSON = function () {
-  const { _id, _v, ...rest } = this.toObject()
+  const { _id, __v, password, ...rest } = this.toObject()
   rest.id = _id
   return rest
 }
