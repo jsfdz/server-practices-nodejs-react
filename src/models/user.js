@@ -3,7 +3,15 @@ const { Schema, model } = require('mongoose')
 const schema = new Schema({
   name: { type: String },
   email: { type: String },
-  password: { type: String }
+  password: { type: String },
+  tasks: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Task'
+  }],
+  posts: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Post'
+  }]
 },
 {
   timestamps: true

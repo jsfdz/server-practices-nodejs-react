@@ -4,12 +4,13 @@ const cors = require('cors')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-const User = require('./models/user.model')
+const User = require('./models/user')
 const Task = require('./models/task')
+const Post = require('./models/post')
 const { auth, generateToken } = require('./auth')
 
 require('dotenv').config()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3001
 try {
   mongoose.connect(process.env.URI, {
     useNewUrlParser: true,
@@ -43,13 +44,16 @@ app.post('/users', async (req, res) => {
   const token = generateToken({ id: user.id })
   res.status(200).json({
     statusCode: 200,
+    user,
     message: `${name} created!`,
     token
   })
 })
 
 app.get('/users', async (req, res) => {
-  const users = await User.find()
+  const users = await User.find({})
+    .populate('tasks', { task: 1, date: 1, isCompleted: 1, createdAt: 1 })
+    .populate('posts', { title: 1, text: 1, likes: 1, createAt: 1 })
   res.status(200).json({
     statusCode: 200,
     data: { users }
@@ -77,7 +81,7 @@ app.put('/users', auth, async (req, res) => {
 })
 
 app.post('/login', async (req, res) => {
-  const {email, password} = req.body
+  const { email, password } = req.body
   const user = await User.findOne({ email })
   if (!user) {
     return res.status(404).json({
@@ -91,19 +95,22 @@ app.post('/login', async (req, res) => {
   if (comparePassword) {
     res.status(200).json({
       statusCode: 200,
-      data: { user },
+      user,
+      message: 'Access granted',
       token
     })
   } else {
-    return res.status(401).json({
-      statusCode: 401,
+    return res.status(400).json({
+      statusCode: 400,
       message: 'invalid password!'
     })
   }
 })
 
 app.get('/tasks', async (req, res) => {
-  const tasks = await Task.find()
+  const tasks = await Task.find().populate('user', {
+    name: 1
+  })
   res.status(200).json({
     statusCode: 200,
     data: { tasks }
@@ -114,7 +121,9 @@ app.post('/tasks', auth, async (req, res) => {
   const { id } = req
   const { title, task, date } = req.body
   const user = await User.findById(id)
-  await new Task({ title, task, date, userId: user._id }).save()
+  const saveTask = await new Task({ title, task, date, user: user._id }).save()
+  user.tasks = user.tasks.concat(saveTask.id)
+  await user.save()
   res.status(200).json({
     statusCode: 200,
     message: 'task created!'
@@ -132,11 +141,43 @@ app.delete('/tasks/:id', auth, async (req, res) => {
 
 app.put('/tasks/:id', auth, async (req, res) => {
   const { id } = req.params
-  const { title, task, date, isCompleted } = req.body
+  const { title, task, date, isCompleted = false } = req.body
   await Task.findByIdAndUpdate(id, { title, task, date, isCompleted })
   res.status(200).json({
     statusCode: 200,
     message: 'task updated!'
+  })
+})
+
+app.post('/posts', auth, async (req, res) => {
+  const { id } = req
+  const { title, text } = req.body
+  const user = await User.findById(id)
+  const savePost = await new Post({ title, text, user: user._id }).save()
+  user.posts = user.posts.concat(savePost)
+  await user.save()
+  res.status(200).json({
+    statusCode: 200,
+    message: 'post created!'
+  })
+})
+
+app.get('/posts', async (req, res) => {
+  const posts = await Post.find().populate('user', {
+    name: 1
+  })
+  res.status(200).json({
+    statusCode: 200,
+    data: { posts }
+  })
+})
+
+app.delete('/posts/:id', auth, async (req, res) => {
+  const { id } = req.params
+  await Post.findByIdAndDelete(id)
+  res.status(200).json({
+    statusCode: 200,
+    message: 'Post deleted!'
   })
 })
 

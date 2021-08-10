@@ -2,11 +2,10 @@ const { Schema, model } = require('mongoose')
 
 const schema = new Schema({
   title: { type: String },
-  task: { type: String },
-  date: { type: Date },
-  isCompleted: {
-    type: Boolean,
-    default: false
+  text: { type: String },
+  likes: {
+    type: Number,
+    default: 0
   },
   user: {
     type: Schema.Types.ObjectId,
@@ -22,4 +21,4 @@ schema.methods.toJSON = function () {
   return rest
 }
 
-module.exports = model('Task', schema)
+module.exports = model('Post', schema)
